@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hệ Thống Phân Tích Sự Thật V.3</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="secret-trigger"></div>
+
+    <main class="scanner-container">
+      <header class="scanner-header">
+        <h1>Hệ Thống Phân Tích Sự Thật</h1>
+        <p>Model: C-137 | Prototype 3.0</p>
+      </header>
+
+      <section class="scanner-display">
+        <div id="display-content">
+          <div class="status-text initial">
+            <span class="text-reveal" data-text="HỆ THỐNG SẴN SÀNG"
+              >HỆ THỐNG SẴN SÀNG</span
+            >
+          </div>
+        </div>
+
+        <div id="progress-container" class="progress-container hidden">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+      </section>
+
+      <footer class="scanner-controls">
+        <button id="scan-button">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="feather feather-target"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="12" r="6"></circle>
+            <circle cx="12" cy="12" r="2"></circle>
+          </svg>
+          <span>Bắt Đầu Quét</span>
+        </button>
+      </footer>
+    </main>
+
+    <div id="record-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h2>Giữ để Thu Âm Giọng Nói</h2>
+        <div class="microphone-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="feather feather-mic"
+          >
+            <path
+              d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
+            ></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+        </div>
+        <button id="record-button" class="record-button">GIỮ ĐỂ GHI ÂM</button>
+        <p class="record-timer">00:00</p>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
