@@ -27,23 +27,7 @@ body {
   position: relative;
 }
 
-/* Nút bí mật */
-#secret-trigger {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  width: 30px;
-  height: 30px;
-  background-color: transparent;
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 1000;
-  transition: box-shadow 0.3s ease;
-}
-
-#secret-trigger:hover {
-  box-shadow: var(--glow-intensity) 5px var(--accent-cyan);
-}
+/* Nút bí mật đã được loại bỏ, không còn trong CSS */
 
 /* Container chính */
 .scanner-container {

@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Lấy các phần tử cần thiết
   const scanButton = document.getElementById("scan-button");
-  const secretTrigger = document.getElementById("secret-trigger");
   const displayContent = document.getElementById("display-content");
   const progressContainer = document.getElementById("progress-container");
   const progressBar = document.getElementById("progress-bar");
@@ -14,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Biến trạng thái
   let isScanning = false;
-  let forceTruthNext = false;
+  let forceLieNext = false; // Mặc định là false
   let recordingTimer = null;
   let recordingDuration = 0; // Giây
   const MIN_RECORD_DURATION = 1; // Thời gian ghi âm tối thiểu (giây)
@@ -28,13 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const targetElement = element.querySelector(".status-text");
     targetElement.textContent = ""; // Đảm bảo nội dung rỗng ban đầu
 
-    // Để hiệu ứng gõ chữ hoạt động tốt với xuống dòng, ta gõ từng ký tự
-    // Tuy nhiên, để đơn giản và tránh lỗi phức tạp với CSS animation,
-    // ta sẽ dùng textContent và điều khiển hiệu ứng typing bằng JS.
-    // CSS sẽ thêm con trỏ nhấp nháy.
-
     let i = 0;
-    // Bọc văn bản trong một span để áp dụng typing effect CSS
     const typingSpan = document.createElement("span");
     typingSpan.classList.add("typing-effect");
     targetElement.appendChild(typingSpan);
@@ -51,27 +44,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }, speed);
     });
-    // Đảm bảo con trỏ biến mất sau khi hoàn thành
     typingSpan.classList.add("completed");
   };
 
-  // Lắng nghe nút bí mật
-  secretTrigger.addEventListener("click", () => {
-    if (isScanning) return; // Không cho kích hoạt khi đang quét
-    forceTruthNext = true;
-    console.log('Hệ thống được hiệu chỉnh. Kết quả tiếp theo sẽ là "SỰ THẬT".');
-    const originalContent = displayContent.innerHTML; // Lưu trạng thái hiện tại
-    // Hiển thị nhanh thông báo hiệu chỉnh
-    typeText(displayContent, "HIỆU CHỈNH KÍCH HOẠT", "analyzing", 40);
-    setTimeout(() => {
-      // Chỉ reset về "HỆ THỐNG SẴN SÀNG" nếu không đang trong quá trình ghi âm hoặc quét
-      if (!isScanning && recordModal.classList.contains("hidden")) {
-        resetScanner();
-      } else {
-        // Nếu đang trong quá trình khác, phục hồi nội dung gốc sau khi thông báo biến mất
-        displayContent.innerHTML = originalContent;
-      }
-    }, 1500);
+  // --- EVENT LISTENER CHO DOUBLE-CLICK / DOUBLE-TAP (ẨN) ---
+  document.body.addEventListener("dblclick", () => {
+    // Ngăn không cho thay đổi chế độ khi đang quét
+    if (isScanning) return;
+
+    forceLieNext = !forceLieNext; // Đảo ngược trạng thái
+
+    // Không hiển thị bất kỳ thông báo nào trên giao diện người dùng
+    if (forceLieNext) {
+      console.log("Chế độ: GIAN DỐI (Đã kích hoạt)"); // Ghi log vào console để kiểm tra
+    } else {
+      console.log("Chế độ: BÌNH THƯỜNG (Đã tắt)"); // Ghi log vào console để kiểm tra
+    }
   });
 
   // Lắng nghe nút quét chính
@@ -96,10 +84,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Gán sự kiện chỉ một lần để tránh lặp lại
     recordButton.onmousedown = startRecording;
     recordButton.onmouseup = stopRecording;
-    recordButton.onmouseleave = stopRecordingIfRecording; // Dừng nếu chuột rời nút khi đang giữ
+    recordButton.onmouseleave = stopRecordingIfRecording;
     recordButton.ontouchstart = startRecording;
     recordButton.ontouchend = stopRecording;
-    recordButton.ontouchcancel = stopRecordingIfRecording; // Dừng nếu chạm bị hủy
+    recordButton.ontouchcancel = stopRecordingIfRecording;
   };
 
   const hideRecordModal = () => {
@@ -117,10 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const startRecording = (event) => {
-    // Chỉ cho phép bắt đầu ghi âm nếu không đang quét và chưa có timer nào chạy
     if (isScanning || recordingTimer) return;
-
-    // Ngăn chặn hành vi mặc định của trình duyệt (ví dụ: kéo ảnh)
     event.preventDefault();
 
     recordButton.classList.add("recording");
@@ -141,10 +126,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const stopRecording = () => {
-    if (!recordingTimer) return; // Không làm gì nếu chưa ghi âm
+    if (!recordingTimer) return;
 
     clearInterval(recordingTimer);
-    recordingTimer = null; // Đặt lại timer về null ngay lập tức
+    recordingTimer = null;
     recordButton.classList.remove("recording");
     recordMessage.classList.remove("active");
     // TODO: Phát âm thanh dừng ghi âm
@@ -152,26 +137,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (recordingDuration < MIN_RECORD_DURATION) {
       recordMessage.textContent = `VUI LÒNG GIỮ NÚT ÍT NHẤT ${MIN_RECORD_DURATION} GIÂY.`;
       recordMessage.classList.add("active");
-      // Hiển thị thông báo lỗi một lúc rồi reset modal
       setTimeout(() => {
         recordMessage.classList.remove("active");
         recordMessage.textContent = "";
         recordTimerDisplay.textContent = "00:00";
-      }, 2500); // Tăng thời gian hiển thị thông báo lỗi
-      // Giữ modal mở để người dùng thử lại
-      recordingDuration = 0; // Reset thời gian ghi âm
-      // Không ẩn modal, chỉ reset trạng thái để có thể ghi âm lại
+      }, 2500);
+      recordingDuration = 0;
     } else {
-      // Nếu ghi âm đủ dài, ẩn modal và bắt đầu phân tích
       hideRecordModal();
       startScanSequence();
     }
   };
 
-  // Hàm này dùng cho onmouseleave/ontouchcancel, chỉ dừng nếu đang ghi âm
   const stopRecordingIfRecording = () => {
     if (recordingTimer) {
-      // Kiểm tra xem timer có đang chạy không
       stopRecording();
     }
   };
@@ -187,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
     await updateStatus("ĐANG KHỞI TẠO HỆ THỐNG...", "analyzing", 40);
     progressContainer.classList.remove("hidden");
     progressBar.style.width = "0%";
-    await sleep(500); // Đợi một chút sau khi gõ xong
+    await sleep(500);
     progressBar.style.width = "20%";
     // TODO: Phát âm thanh loading
 
@@ -230,11 +209,12 @@ document.addEventListener("DOMContentLoaded", () => {
     progressContainer.classList.add("hidden");
     // TODO: Phát âm thanh kết quả
 
-    if (forceTruthNext) {
-      await updateStatus("SỰ THẬT", "truth", 60); // Nhanh hơn một chút cho kết quả
-      forceTruthNext = false; // Reset lại trạng thái gian lận
+    if (forceLieNext) {
+      // Nếu forceLieNext là true, luôn hiển thị "GIAN DỐI"
+      await updateStatus("GIAN DỐI", "lie", 60);
     } else {
-      await updateStatus("GIAN DỐI", "lie", 60); // Nhanh hơn một chút cho kết quả
+      // Ngược lại, hiển thị "SỰ THẬT"
+      await updateStatus("SỰ THẬT", "truth", 60);
     }
 
     // 5. Reset lại giao diện sau một khoảng thời gian
